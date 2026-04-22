@@ -4,33 +4,28 @@
 // Initializes Firebase with modular v9+ SDK
 // Exports auth and db instances for use throughout the app
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getFirestore, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-// ====================================================================
-// Firebase Configuration
-// ====================================================================
-// IMPORTANT: Replace these values with your Firebase project credentials
-// Get these from: Firebase Console > Project Settings > Web App Config
-
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID" // Optional
+  apiKey: "AIzaSyC33i5BYOGABIuxeQu0oF0qaL7KJhVo0x8",
+  authDomain: "invoice-8a62a.firebaseapp.com",
+  databaseURL: "https://invoice-8a62a-default-rtdb.firebaseio.com",
+  projectId: "invoice-8a62a",
+  storageBucket: "invoice-8a62a.firebasestorage.app",
+  messagingSenderId: "307582903461",
+  appId: "1:307582903461:web:b171244d590554a052594c",
+  measurementId: "G-HY20ZZKH9C"
 };
 
-// ====================================================================
 // Initialize Firebase
-// ====================================================================
-
-let app;
-let auth;
-let db;
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 try {
     // Initialize Firebase App

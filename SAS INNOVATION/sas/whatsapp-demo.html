@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Integration Demo - PayFlow</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-indigo-600">PayFlow - WhatsApp Demo</h1>
+                <a href="dashboard.html" class="text-indigo-600 hover:text-indigo-700 font-medium">Back to Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="mb-8">
+            <h2 class="text-4xl font-bold text-gray-800 mb-2">WhatsApp Integration Demo</h2>
+            <p class="text-gray-600">Test WhatsApp message generation and link creation</p>
+        </div>
+
+        <!-- Demo Form -->
+        <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Generate WhatsApp Message</h3>
+
+            <form id="demoForm" class="space-y-4">
+                <!-- Customer Name -->
+                <div>
+                    <label for="demoCustomerName" class="block text-gray-700 font-medium mb-2">Customer Name</label>
+                    <input 
+                        type="text" 
+                        id="demoCustomerName"
+                        value="John Doe"
+                        placeholder="Enter customer name"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                </div>
+
+                <!-- Phone Number -->
+                <div>
+                    <label for="demoPhoneNumber" class="block text-gray-700 font-medium mb-2">Phone Number</label>
+                    <input 
+                        type="tel" 
+                        id="demoPhoneNumber"
+                        value="+2348012345678"
+                        placeholder="+234..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                    <p class="text-gray-500 text-xs mt-1">Include country code (e.g., +234 for Nigeria)</p>
+                </div>
+
+                <!-- Amount -->
+                <div>
+                    <label for="demoAmount" class="block text-gray-700 font-medium mb-2">Amount (₦)</label>
+                    <input 
+                        type="number" 
+                        id="demoAmount"
+                        value="50000"
+                        step="100"
+                        placeholder="0"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                </div>
+
+                <!-- Due Date -->
+                <div>
+                    <label for="demoDueDate" class="block text-gray-700 font-medium mb-2">Due Date</label>
+                    <input 
+                        type="date" 
+                        id="demoDueDate"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="demoDescription" class="block text-gray-700 font-medium mb-2">Description (Optional)</label>
+                    <textarea 
+                        id="demoDescription"
+                        value="Website Design Services"
+                        placeholder="Invoice description"
+                        rows="3"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                    ></textarea>
+                </div>
+
+                <!-- Template Selection -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Message Template</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="template" value="INVOICE_REMINDER" checked class="w-4 h-4">
+                            <span class="ml-2 text-gray-700">Standard Reminder</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="template" value="INVOICE_DETAILED" class="w-4 h-4">
+                            <span class="ml-2 text-gray-700">Detailed Invoice</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="template" value="PAYMENT_RECEIVED" class="w-4 h-4">
+                            <span class="ml-2 text-gray-700">Payment Received</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="template" value="OVERDUE_REMINDER" class="w-4 h-4">
+                            <span class="ml-2 text-gray-700">Overdue Reminder</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 pt-4">
+                    <button 
+                        type="button"
+                        id="generateBtn"
+                        class="flex-1 bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition"
+                    >
+                        Generate Message
+                    </button>
+                    <button 
+                        type="button"
+                        id="sendBtn"
+                        class="flex-1 bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition"
+                    >
+                        📱 Send WhatsApp
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Generated Message -->
+        <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Generated Message</h3>
+            
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p class="text-sm text-gray-600 mb-2">Message Preview:</p>
+                <p id="messagePreviewText" class="text-gray-800 whitespace-pre-wrap font-mono text-sm leading-relaxed">Your message will appear here...</p>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-gray-600 mb-2">WhatsApp Link:</p>
+                <div class="flex items-center space-x-2">
+                    <code id="linkPreviewText" class="flex-1 bg-white p-3 rounded border border-gray-300 text-xs overflow-x-auto">Your link will appear here...</code>
+                    <button id="copyBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-medium">
+                        Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Character Count -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Message Statistics</h3>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-indigo-600" id="charCountDisplay">0</p>
+                    <p class="text-gray-600 text-sm">Characters</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-green-600" id="smsCountDisplay">0</p>
+                    <p class="text-gray-600 text-sm">SMS Parts</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-purple-600" id="phoneStatusDisplay">Valid</p>
+                    <p class="text-gray-600 text-sm">Phone Number</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="hidden fixed bottom-4 right-4 px-6 py-4 rounded-lg text-white font-medium shadow-lg animate-slideInRight z-50"></div>
+
+    <!-- Scripts -->
+    <script src="js/whatsapp-service.js" type="module"></script>
+    <script type="module">
+        import {
+            generateWhatsAppMessage,
+            generateWhatsAppLink,
+            generatePlatformSpecificLink,
+            validatePhoneNumber,
+            cleanPhoneNumber,
+            copyWhatsAppLinkToClipboard
+        } from "./js/whatsapp-service.js";
+
+        // Set today's date as default
+        document.getElementById("demoDueDate").valueAsDate = new Date(Date.now() + 30*24*60*60*1000);
+
+        // Generate button
+        document.getElementById("generateBtn").addEventListener("click", generateDemo);
+
+        // Send button
+        document.getElementById("sendBtn").addEventListener("click", sendDemo);
+
+        // Copy button
+        document.getElementById("copyBtn").addEventListener("click", copyLink);
+
+        // Real-time updates
+        document.querySelectorAll("#demoForm input, #demoForm textarea").forEach(input => {
+            input.addEventListener("change", generateDemo);
+            input.addEventListener("input", generateDemo);
+        });
+
+        document.querySelectorAll("input[name='template']").forEach(radio => {
+            radio.addEventListener("change", generateDemo);
+        });
+
+        /**
+         * Generate demo message
+         */
+        function generateDemo() {
+            try {
+                const customerName = document.getElementById("demoCustomerName").value;
+                const phoneNumber = document.getElementById("demoPhoneNumber").value;
+                const amount = parseFloat(document.getElementById("demoAmount").value);
+                const dueDate = new Date(document.getElementById("demoDueDate").value);
+                const description = document.getElementById("demoDescription").value;
+                const template = document.querySelector("input[name='template']:checked").value;
+
+                // Validate
+                if (!customerName || !phoneNumber || !amount || !dueDate) {
+                    showNotification("Please fill all required fields", "error");
+                    return;
+                }
+
+                // Create invoice object
+                const invoice = {
+                    customerName,
+                    customerPhone: phoneNumber,
+                    amount,
+                    dueDate: { toDate: () => dueDate },
+                    description,
+                    id: "DEMO001"
+                };
+
+                // Generate message
+                const message = generateWhatsAppMessage(invoice, { template });
+
+                // Generate link
+                const link = generatePlatformSpecificLink(phoneNumber, message);
+
+                // Update UI
+                document.getElementById("messagePreviewText").textContent = message;
+                document.getElementById("linkPreviewText").textContent = link;
+
+                // Update stats
+                document.getElementById("charCountDisplay").textContent = message.length;
+                document.getElementById("smsCountDisplay").textContent = Math.ceil(message.length / 160);
+
+                // Validate phone
+                const isValidPhone = validatePhoneNumber(cleanPhoneNumber(phoneNumber));
+                const phoneStatus = document.getElementById("phoneStatusDisplay");
+                phoneStatus.textContent = isValidPhone ? "Valid ✓" : "Invalid ✗";
+                phoneStatus.className = `text-3xl font-bold ${isValidPhone ? "text-green-600" : "text-red-600"}`;
+
+            } catch (error) {
+                console.error("Error:", error);
+                showNotification(error.message, "error");
+            }
+        }
+
+        /**
+         * Send demo message
+         */
+        function sendDemo() {
+            try {
+                const link = document.getElementById("linkPreviewText").textContent;
+
+                if (link === "Your link will appear here...") {
+                    showNotification("Please generate a message first", "error");
+                    return;
+                }
+
+                window.open(link, "whatsapp", "width=800,height=600");
+                showNotification("✅ WhatsApp opened in new window", "success");
+
+            } catch (error) {
+                console.error("Error:", error);
+                showNotification(error.message, "error");
+            }
+        }
+
+        /**
+         * Copy link
+         */
+        async function copyLink() {
+            try {
+                const link = document.getElementById("linkPreviewText").textContent;
+
+                if (link === "Your link will appear here...") {
+                    showNotification("Please generate a message first", "error");
+                    return;
+                }
+
+                const copied = await copyWhatsAppLinkToClipboard(link);
+
+                if (copied) {
+                    showNotification("✅ Link copied to clipboard", "success");
+                } else {
+                    showNotification("Failed to copy link", "error");
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                showNotification(error.message, "error");
+            }
+        }
+
+        /**
+         * Show notification
+         */
+        function showNotification(message, type) {
+            const notification = document.getElementById("notification");
+            const colors = {
+                success: "bg-green-600",
+                error: "bg-red-600",
+                info: "bg-blue-600"
+            };
+
+            notification.textContent = message;
+            notification.className = `${colors[type]} text-white px-6 py-4 rounded-lg font-medium shadow-lg animate-slideInRight`;
+            notification.classList.remove("hidden");
+
+            setTimeout(() => {
+                notification.classList.add("hidden");
+            }, 4000);
+        }
+
+        // Generate initial demo
+        generateDemo();
+    </script>
+</body>
+</html>

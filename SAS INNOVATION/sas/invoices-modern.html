@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - PayFlow</title>
+    <link rel="stylesheet" href="css/tailwind-config.css">
+    <link rel="stylesheet" href="css/dashboard-modern.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="dashboard.html" class="navbar-logo">
+                <span class="navbar-logo-icon">💳</span>
+                <span>PayFlow</span>
+            </a>
+
+            <div class="navbar-menu">
+                <a href="dashboard.html" class="navbar-menu-item">Dashboard</a>
+                <a href="invoices.html" class="navbar-menu-item active">Invoices</a>
+                <a href="settings.html" class="navbar-menu-item">Settings</a>
+            </div>
+
+            <div class="navbar-user">
+                <button id="logoutBtn" class="btn btn-secondary btn-sm">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-container">
+        <!-- Page Header -->
+        <div class="page-header flex justify-between items-start">
+            <div>
+                <h1 class="page-title">Invoices</h1>
+                <p class="page-subtitle">Create, manage, and track all your invoices</p>
+            </div>
+            <button id="createInvoiceBtn" class="btn btn-primary">
+                <span>➕</span>
+                <span>New Invoice</span>
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="grid sm:grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Search</label>
+                        <input type="text" id="searchInput" class="form-input" placeholder="Search by customer...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="statusFilter" class="form-select">
+                            <option value="">All Invoices</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Overdue">Overdue</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Sort By</label>
+                        <select id="sortFilter" class="form-select">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="amount-high">Highest Amount</option>
+                            <option value="amount-low">Lowest Amount</option>
+                            <option value="due-soon">Due Soon</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoices Grid -->
+        <div id="invoicesContainer" class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading state -->
+            <div class="col-span-full text-center py-12">
+                <div class="animate-spin inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                <p class="mt-4 text-gray-500">Loading invoices...</p>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyInvoices" class="hidden card">
+            <div class="empty-state py-16">
+                <div class="empty-state-icon">📭</div>
+                <h3 class="empty-state-title">No Invoices Found</h3>
+                <p class="empty-state-description">Create your first invoice to get started</p>
+                <button id="createInvoiceBtnEmpty" class="btn btn-primary">Create Invoice</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Invoice Modal -->
+    <div id="invoiceModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Create New Invoice</h2>
+                <button class="modal-close" id="closeInvoiceModal">✕</button>
+            </div>
+
+            <form id="invoiceForm" class="modal-body space-y-6">
+                <div class="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label required">Customer Name</label>
+                        <input type="text" id="customerName" class="form-input" placeholder="John Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="customerEmail" class="form-input" placeholder="john@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required">Phone</label>
+                        <input type="tel" id="customerPhone" class="form-input" placeholder="+234..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required">Amount (₦)</label>
+                        <input type="number" id="amount" class="form-input" placeholder="0.00" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required">Invoice Date</label>
+                        <input type="date" id="invoiceDate" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required">Due Date</label>
+                        <input type="date" id="dueDate" class="form-input" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="description" class="form-textarea" placeholder="Enter invoice details..."></textarea>
+                </div>
+
+                <div id="formAlert" class="hidden alert alert-error"></div>
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelInvoiceBtn">Cancel</button>
+                <button type="submit" form="invoiceForm" class="btn btn-primary" id="submitInvoiceBtn">Create Invoice</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="hidden fixed bottom-4 right-4 px-6 py-4 rounded-lg text-white font-medium shadow-lg animate-slideInRight z-50"></div>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js" type="module"></script>
+    <script src="js/route-protection.js" type="module"></script>
+    <script src="js/invoice-utils.js" type="module"></script>
+    <script src="js/invoice-service.js" type="module"></script>
+    <script src="js/invoice-form.js" type="module"></script>
+    <script src="js/invoice-list.js" type="module"></script>
+    <script src="js/whatsapp-service.js" type="module"></script>
+    <script src="js/whatsapp-ui.js" type="module"></script>
+</body>
+</html>

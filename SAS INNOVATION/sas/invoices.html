@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - PayFlow</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/invoice-styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold">PF</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-indigo-600">PayFlow</h1>
+                </div>
+
+                <div class="hidden md:flex space-x-6">
+                    <a href="dashboard.html" class="text-gray-600 hover:text-indigo-600 font-medium transition">Dashboard</a>
+                    <a href="invoices.html" class="text-indigo-600 font-medium transition border-b-2 border-indigo-600">Invoices</a>
+                    <a href="settings.html" class="text-gray-600 hover:text-indigo-600 font-medium transition">Settings</a>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <span id="userEmailNav" class="text-gray-600 text-sm hidden sm:inline"></span>
+                    <button id="logoutBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-4xl font-bold text-gray-800 mb-2">Invoices</h2>
+                <p class="text-gray-600">Create, manage, and track all your invoices</p>
+            </div>
+            <button id="createInvoiceBtn" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold flex items-center space-x-2">
+                <span>+</span>
+                <span>Create Invoice</span>
+            </button>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="grid md:grid-cols-3 gap-4">
+                <!-- Search -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Search Invoices</label>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search by customer name or email..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Filter by Status</label>
+                    <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="">All Invoices</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Overdue">Overdue</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Date Range Filter -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Sort by</label>
+                    <select id="sortFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="amount-high">Highest Amount</option>
+                        <option value="amount-low">Lowest Amount</option>
+                        <option value="due-soon">Due Soon</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-gray-600 font-medium">Total Invoices</h3>
+                    <span class="text-2xl">📄</span>
+                </div>
+                <p class="text-3xl font-bold text-gray-800" id="totalInvoices">0</p>
+                <p class="text-gray-500 text-sm mt-2">All invoices</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-gray-600 font-medium">Pending</h3>
+                    <span class="text-2xl">⏳</span>
+                </div>
+                <p class="text-3xl font-bold text-yellow-600" id="pendingCount">0</p>
+                <p class="text-gray-500 text-sm mt-2">Awaiting payment</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-gray-600 font-medium">Paid</h3>
+                    <span class="text-2xl">✅</span>
+                </div>
+                <p class="text-3xl font-bold text-green-600" id="paidCount">0</p>
+                <p class="text-gray-500 text-sm mt-2">Completed</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-gray-600 font-medium">Total Value</h3>
+                    <span class="text-2xl">💰</span>
+                </div>
+                <p class="text-3xl font-bold text-indigo-600" id="totalValue">$0</p>
+                <p class="text-gray-500 text-sm mt-2">All pending + paid</p>
+            </div>
+        </div>
+
+        <!-- Invoices List -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Invoice List</h3>
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden lg:block overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-gray-700 font-semibold">Customer</th>
+                            <th class="px-6 py-4 text-left text-gray-700 font-semibold">Amount</th>
+                            <th class="px-6 py-4 text-left text-gray-700 font-semibold">Due Date</th>
+                            <th class="px-6 py-4 text-left text-gray-700 font-semibold">Status</th>
+                            <th class="px-6 py-4 text-left text-gray-700 font-semibold">Created</th>
+                            <th class="px-6 py-4 text-left text-gray-700 font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesTableBody" class="divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                <p>No invoices yet. Create your first invoice to get started!</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div id="invoicesCardView" class="lg:hidden divide-y divide-gray-200">
+                <div class="px-6 py-8 text-center text-gray-500">
+                    <p>No invoices yet. Create your first invoice to get started!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Invoice Modal -->
+    <div id="invoiceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Create New Invoice</h3>
+                <button id="closeInvoiceModal" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="formAlert" class="hidden mb-4 p-4 rounded-lg text-sm flex items-start space-x-2"></div>
+
+            <!-- Invoice Form -->
+            <form id="invoiceForm" class="space-y-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- Customer Name -->
+                    <div>
+                        <label for="customerName" class="block text-gray-700 font-medium mb-2">
+                            Customer Name <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="customerName"
+                            placeholder="John Doe"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            required
+                        >
+                        <span class="error-text text-red-500 text-sm hidden"></span>
+                    </div>
+
+                    <!-- Customer Email -->
+                    <div>
+                        <label for="customerEmail" class="block text-gray-700 font-medium mb-2">
+                            Customer Email
+                        </label>
+                        <input 
+                            type="email" 
+                            id="customerEmail"
+                            placeholder="john@example.com"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                        >
+                        <span class="error-text text-red-500 text-sm hidden"></span>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div>
+                        <label for="customerPhone" class="block text-gray-700 font-medium mb-2">
+                            Phone Number <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="customerPhone"
+                            placeholder="+1 (555) 123-4567"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            required
+                        >
+                        <span class="error-text text-red-500 text-sm hidden"></span>
+                        <p class="text-gray-500 text-xs mt-1">Include country code (e.g., +1, +44, +91)</p>
+                    </div>
+
+                    <!-- Amount -->
+                    <div>
+                        <label for="amount" class="block text-gray-700 font-medium mb-2">
+                            Amount (USD) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-600">$</span>
+                            <input 
+                                type="number" 
+                                id="amount"
+                                placeholder="0.00"
+                                step="0.01"
+                                min="0"
+                                class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                required
+                            >
+                        </div>
+                        <span class="error-text text-red-500 text-sm hidden"></span>
+                    </div>
+
+                    <!-- Invoice Date -->
+                    <div>
+                        <label for="invoiceDate" class="block text-gray-700 font-medium mb-2">
+                            Invoice Date <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            id="invoiceDate"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            required
+                        >
+                        <span class="error-text text-red-500 text-sm hidden"></span>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div>
+                        <label for="dueDate" class="block text-gray-700 font-medium mb-2">
+                            Due Date <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            id="dueDate"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            required
+                        >
+                        <span class="error-text text-red-500 text-sm hidden"></span>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-gray-700 font-medium mb-2">
+                        Description / Notes
+                    </label>
+                    <textarea 
+                        id="description"
+                        placeholder="Enter invoice details, payment terms, or any additional information..."
+                        rows="4"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                    ></textarea>
+                    <span class="error-text text-red-500 text-sm hidden"></span>
+                </div>
+
+                <!-- Invoice Items (Optional) -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Invoice Items (Optional)</label>
+                    <div id="invoiceItems" class="space-y-3 mb-3">
+                        <!-- Items will be added here -->
+                    </div>
+                    <button 
+                        type="button" 
+                        id="addItemBtn"
+                        class="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
+                    >
+                        + Add Item
+                    </button>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex gap-3 pt-6 border-t">
+                    <button 
+                        type="submit"
+                        id="submitInvoiceBtn"
+                        class="flex-1 bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center justify-center space-x-2"
+                    >
+                        <span id="submitBtnText">Create Invoice</span>
+                        <span id="submitSpinner" class="hidden">
+                            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    <button 
+                        type="button"
+                        id="cancelInvoiceBtn"
+                        class="flex-1 bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-lg hover:bg-gray-400 transition"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js" type="module"></script>
+    <script src="js/route-protection.js" type="module"></script>
+    <script src="js/invoice-utils.js" type="module"></script>
+    <script src="js/invoice-service.js" type="module"></script>
+    <script src="js/invoice-form.js" type="module"></script>
+    <script src="js/invoice-list.js" type="module"></script>
+</body>
+</html>

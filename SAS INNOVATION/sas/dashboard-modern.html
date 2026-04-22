@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PayFlow</title>
+    <link rel="stylesheet" href="css/tailwind-config.css">
+    <link rel="stylesheet" href="css/dashboard-modern.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="dashboard.html" class="navbar-logo">
+                <span class="navbar-logo-icon">💳</span>
+                <span>PayFlow</span>
+            </a>
+
+            <div class="navbar-menu">
+                <a href="dashboard.html" class="navbar-menu-item active">Dashboard</a>
+                <a href="invoices.html" class="navbar-menu-item">Invoices</a>
+                <a href="settings.html" class="navbar-menu-item">Settings</a>
+            </div>
+
+            <div class="navbar-user">
+                <div class="navbar-user-info">
+                    <div class="navbar-user-name" id="userNameNav">John Doe</div>
+                    <div class="navbar-user-email" id="userEmailNav">john@example.com</div>
+                </div>
+                <div class="navbar-avatar" id="avatarNav">JD</div>
+                <button id="logoutBtn" class="btn btn-secondary btn-sm">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Welcome back, <span id="userName">John</span>! 👋</h1>
+            <p class="page-subtitle">Here's your invoice overview for today</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="flex flex-wrap gap-3 mb-8">
+            <a href="invoices.html" class="btn btn-primary">
+                <span>➕</span>
+                <span>New Invoice</span>
+            </a>
+            <button id="refreshBtn" class="btn btn-secondary">
+                <span>🔄</span>
+                <span>Refresh Data</span>
+            </button>
+            <a href="invoices.html" class="btn btn-secondary">
+                <span>📋</span>
+                <span>View All</span>
+            </a>
+            <button id="toggleViewBtn" class="btn btn-secondary">
+                <span id="viewToggleIcon">📊</span>
+                <span>Table View</span>
+            </button>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <!-- Total Invoices -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Total Invoices</h3>
+                    <div class="stat-icon">📄</div>
+                </div>
+                <p class="stat-value" id="statTotalInvoices">0</p>
+                <p class="stat-change">All time</p>
+            </div>
+
+            <!-- Pending Invoices -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Pending</h3>
+                    <div class="stat-icon">⏳</div>
+                </div>
+                <p class="stat-value text-warning" id="statPending">0</p>
+                <p class="stat-change">Awaiting payment</p>
+            </div>
+
+            <!-- Paid Invoices -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Paid</h3>
+                    <div class="stat-icon">✅</div>
+                </div>
+                <p class="stat-value text-success" id="statPaid">0</p>
+                <p class="stat-change">Completed</p>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Total Value</h3>
+                    <div class="stat-icon">💰</div>
+                </div>
+                <p class="stat-value text-primary" id="statTotalValue">$0</p>
+                <p class="stat-change">All invoices</p>
+            </div>
+
+            <!-- Overdue -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Overdue</h3>
+                    <div class="stat-icon">⚠️</div>
+                </div>
+                <p class="stat-value text-danger" id="statOverdue">0</p>
+                <p class="stat-change">Past due date</p>
+            </div>
+        </div>
+
+        <!-- Recent Invoices Section -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Recent Invoices</h2>
+                    <p class="text-gray-600 text-sm mt-1">Your latest invoices and their status</p>
+                </div>
+                <div class="btn-group">
+                    <button id="tableViewBtn" class="btn btn-primary btn-sm">📊 Table</button>
+                    <button id="cardViewBtn" class="btn btn-secondary btn-sm">🎴 Cards</button>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div id="tableViewContainer" class="hidden lg:block card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Days Left</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoicesTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center py-8">
+                                    <div class="animate-spin inline-block w-6 h-6 border-4 border-primary border-t-transparent rounded-full"></div>
+                                    <p class="mt-2 text-gray-500">Loading invoices...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Card View -->
+            <div id="cardViewContainer" class="lg:hidden card-body">
+                <div id="invoicesCardView" class="space-y-4">
+                    <div class="text-center py-8">
+                        <div class="animate-spin inline-block w-6 h-6 border-4 border-primary border-t-transparent rounded-full"></div>
+                        <p class="mt-2 text-gray-500">Loading invoices...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden card-body">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3 class="empty-state-title">No Invoices Yet</h3>
+                    <p class="empty-state-description">Create your first invoice to get started</p>
+                    <a href="invoices.html" class="btn btn-primary">Create Invoice</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="hidden fixed bottom-4 right-4 px-6 py-4 rounded-lg text-white font-medium shadow-lg animate-slideInRight z-50"></div>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js" type="module"></script>
+    <script src="js/route-protection.js" type="module"></script>
+    <script src="js/invoice-utils.js" type="module"></script>
+    <script src="js/dashboard-service.js" type="module"></script>
+    <script src="js/dashboard.js" type="module"></script>
+</body>
+</html>

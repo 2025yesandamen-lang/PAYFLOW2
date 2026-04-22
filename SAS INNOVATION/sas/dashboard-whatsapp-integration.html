@@ -1,0 +1,29 @@
+<!-- Add this script import near the top of the file -->
+<script src="js/whatsapp-service.js" type="module"></script>
+<script src="js/whatsapp-ui.js" type="module"></script>
+
+<!-- Update the table cell to include WhatsApp button -->
+<!-- In the createTableRow function, modify the actions cell: -->
+<td class="px-6 py-4">
+    <div class="flex space-x-2">
+        <button class="view-btn text-indigo-600 hover:text-indigo-900 font-medium text-sm" 
+                data-invoice-id="${invoice.id}" title="View invoice">
+            View
+        </button>
+        <!-- WhatsApp Button -->
+        <button class="whatsapp-send-btn text-green-600 hover:text-green-900 font-medium text-sm" 
+                data-invoice-id="${invoice.id}" title="Send via WhatsApp">
+            📱 WhatsApp
+        </button>
+        ${invoice.status === "Pending" ? `
+            <button class="mark-paid-btn text-green-600 hover:text-green-900 font-medium text-sm" 
+                    data-invoice-id="${invoice.id}" title="Mark as paid">
+                Pay
+            </button>
+        ` : ""}
+        <button class="delete-btn text-red-600 hover:text-red-900 font-medium text-sm" 
+                data-invoice-id="${invoice.id}" title="Delete invoice">
+            Delete
+        </button>
+    </div>
+</td>

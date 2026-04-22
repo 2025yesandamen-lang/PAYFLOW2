@@ -1,0 +1,380 @@
+// ====================================================================
+// Firebase Firestore Security Rules
+// ====================================================================
+// Comprehensive rules for invoice management system with detailed
+// comments explaining each rule and permission
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ====================================================================
+    // Helper Functions
+    // ====================================================================
+    
+    /**
+     * Check if user is authenticated
+     * Returns true if user has valid Firebase Authentication
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Check if user owns the document
+     * Compares request.auth.uid with document userId field
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    /**
+     * Check if user is admin
+     * Admins can bypass some restrictions (optional)
+     */
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    /**
+     * Validate invoice data on write
+     * Ensures required fields are present and valid
+     */
+    function isValidInvoiceData() {
+      let data = request.resource.data;
+      return (
+        // Required fields must exist
+        data.keys().hasAll([
+          'userId',
+          'customerName',
+          'customerPhone',
+          'amount',
+          'invoiceDate',
+          'dueDate',
+          'status',
+          'createdAt'
+        ]) &&
+        // Field types must be correct
+        data.userId is string &&
+        data.customerName is string &&
+        data.customerPhone is string &&
+        data.amount is number &&
+        data.invoiceDate is timestamp &&
+        data.dueDate is timestamp &&
+        data.status is string &&
+        data.createdAt is timestamp &&
+        // Required strings cannot be empty
+        data.customerName.size() > 0 &&
+        data.customerPhone.size() > 0 &&
+        // Amount must be positive
+        data.amount > 0 &&
+        // Status must be valid
+        data.status in ['Pending', 'Paid', 'Overdue', 'Cancelled'] &&
+        // Dates must be valid
+        data.dueDate >= data.invoiceDate
+      );
+    }
+    
+    /**
+     * Validate invoice update data
+     * Allows partial updates with validation
+     */
+    function isValidInvoiceUpdate() {
+      let data = request.resource.data;
+      // Check each field if it exists
+      return (
+        (!('customerName' in data) || data.customerName is string && data.customerName.size() > 0) &&
+        (!('customerPhone' in data) || data.customerPhone is string && data.customerPhone.size() > 0) &&
+        (!('amount' in data) || data.amount is number && data.amount > 0) &&
+        (!('status' in data) || data.status in ['Pending', 'Paid', 'Overdue', 'Cancelled']) &&
+        (!('dueDate' in data) || data.dueDate is timestamp) &&
+        (!('invoiceDate' in data) || data.invoiceDate is timestamp) &&
+        // updatedAt must always be current timestamp
+        data.updatedAt == request.time
+      );
+    }
+    
+    /**
+     * Prevent modification of system fields
+     * userId and createdAt cannot be changed after creation
+     */
+    function cannotModifySystemFields() {
+      let newData = request.resource.data;
+      let oldData = resource.data;
+      return (
+        newData.userId == oldData.userId &&
+        newData.createdAt == oldData.createdAt
+      );
+    }
+
+    // ====================================================================
+    // Users Collection
+    // ====================================================================
+    /**
+     * Rules for /users/{userId}
+     * 
+     * Users can only:
+     * - Read their own user document
+     * - Create their own user document (during signup)
+     * - Update their own user document
+     * - Cannot delete user documents
+     */
+    match /users/{userId} {
+      // Read: Only user can read their own profile
+      allow read: if isAuthenticated() && isOwner(userId);
+      
+      // Create: Only during signup, creating own profile
+      allow create: if isAuthenticated() && isOwner(userId) && 
+                      request.resource.data.keys().hasAll(['email', 'displayName']) &&
+                      request.resource.data.email is string &&
+                      request.resource.data.displayName is string &&
+                      request.resource.data.createdAt == request.time;
+      
+      // Update: User can update their own profile
+      allow update: if isAuthenticated() && isOwner(userId) &&
+                       request.resource.data.updatedAt == request.time;
+      
+      // Delete: Not allowed
+      allow delete: if false;
+
+      // ====================================================================
+      // User Sub-collections
+      // ====================================================================
+      
+      /**
+       * Rules for /users/{userId}/settings/{settingId}
+       * User's personal settings
+       */
+      match /settings/{settingId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+      
+      /**
+       * Rules for /users/{userId}/notifications/{notificationId}
+       * User's notification preferences
+       */
+      match /notifications/{notificationId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+
+    // ====================================================================
+    // Invoices Collection
+    // ====================================================================
+    /**
+     * Rules for /invoices/{invoiceId}
+     * 
+     * Core security rules for invoice documents:
+     * - Users can ONLY access invoices they created (userId field)
+     * - Authentication is REQUIRED for all operations
+     * - Prevents data tampering through validation
+     * - Prevents privilege escalation by freezing system fields
+     */
+    match /invoices/{invoiceId} {
+      
+      /**
+       * READ: User can read invoice only if they own it
+       * 
+       * Checks:
+       * 1. User is authenticated (has valid Firebase Auth token)
+       * 2. Invoice's userId matches current user's UID
+       * 
+       * Security benefit: Prevents users from querying other users' invoices
+       */
+      allow read: if isAuthenticated() && 
+                     isOwner(resource.data.userId);
+      
+      /**
+       * CREATE: User can create invoice only for themselves
+       * 
+       * Checks:
+       * 1. User is authenticated
+       * 2. Provided userId matches current user
+       * 3. All required fields are present
+       * 4. All fields have correct data types
+       * 5. Field values are valid (non-empty strings, positive amounts, etc)
+       * 6. Timestamps are valid
+       * 
+       * Security benefits:
+       * - Prevents creating invoices for other users
+       * - Validates data structure before saving
+       * - Ensures data integrity
+       * - Prevents invalid data from being stored
+       */
+      allow create: if isAuthenticated() && 
+                       isOwner(request.resource.data.userId) &&
+                       isValidInvoiceData() &&
+                       request.resource.data.updatedAt == request.time;
+      
+      /**
+       * UPDATE: User can update only their own invoices
+       * 
+       * Checks:
+       * 1. User is authenticated
+       * 2. User owns the invoice
+       * 3. System fields (userId, createdAt) cannot be modified
+       * 4. Updated data passes validation
+       * 5. updatedAt timestamp is set to current time
+       * 
+       * Security benefits:
+       * - Prevents modification of ownership
+       * - Prevents timestamp tampering
+       * - Ensures data integrity during updates
+       * - Logs when changes were made
+       */
+      allow update: if isAuthenticated() && 
+                       isOwner(resource.data.userId) &&
+                       cannotModifySystemFields() &&
+                       isValidInvoiceUpdate();
+      
+      /**
+       * DELETE: User can delete only their own invoices
+       * 
+       * Checks:
+       * 1. User is authenticated
+       * 2. User owns the invoice
+       * 
+       * Note: Consider implementing soft deletes (status = 'Deleted')
+       * instead of hard deletes for audit trails
+       */
+      allow delete: if isAuthenticated() && 
+                       isOwner(resource.data.userId);
+
+      // ====================================================================
+      // Invoice Sub-collections
+      // ====================================================================
+      
+      /**
+       * Rules for /invoices/{invoiceId}/items/{itemId}
+       * Line items for invoices
+       * 
+       * Users can read/write items only for their own invoices
+       */
+      match /items/{itemId} {
+        allow read: if isAuthenticated() && 
+                       isOwner(get(/databases/$(database)/documents/invoices/$(invoiceId)).data.userId);
+        
+        allow write: if isAuthenticated() && 
+                        isOwner(get(/databases/$(database)/documents/invoices/$(invoiceId)).data.userId) &&
+                        request.resource.data.keys().hasAll(['description', 'quantity', 'rate']) &&
+                        request.resource.data.quantity is number &&
+                        request.resource.data.rate is number &&
+                        request.resource.data.quantity > 0 &&
+                        request.resource.data.rate >= 0;
+      }
+      
+      /**
+       * Rules for /invoices/{invoiceId}/activity/{activityId}
+       * Audit trail / activity log for invoice
+       */
+      match /activity/{activityId} {
+        // Only allow reads and creates, no updates or deletes (immutable log)
+        allow read: if isAuthenticated() && 
+                       isOwner(get(/databases/$(database)/documents/invoices/$(invoiceId)).data.userId);
+        
+        allow create: if isAuthenticated() && 
+                         isOwner(get(/databases/$(database)/documents/invoices/$(invoiceId)).data.userId) &&
+                         request.resource.data.keys().hasAll(['action', 'timestamp', 'userId']) &&
+                         request.resource.data.timestamp == request.time;
+        
+        allow update, delete: if false; // Immutable audit log
+      }
+      
+      /**
+       * Rules for /invoices/{invoiceId}/payments/{paymentId}
+       * Payment records for invoice
+       */
+      match /payments/{paymentId} {
+        allow read: if isAuthenticated() && 
+                       isOwner(get(/databases/$(database)/documents/invoices/$(invoiceId)).data.userId);
+        
+        allow create: if isAuthenticated() && 
+                         isOwner(get(/databases/$(database)/documents/invoices/$(invoiceId)).data.userId) &&
+                         request.resource.data.keys().hasAll(['amount', 'date', 'method']) &&
+                         request.resource.data.amount is number &&
+                         request.resource.data.amount > 0 &&
+                         request.resource.data.date is timestamp;
+        
+        allow update: if isAuthenticated() && 
+                         isOwner(get(/databases/$(database)/documents/invoices/$(invoiceId)).data.userId);
+        
+        allow delete: if isAuthenticated() && 
+                         isOwner(get(/databases/$(database)/documents/invoices/$(invoiceId)).data.userId);
+      }
+    }
+
+    // ====================================================================
+    // Customers Collection (Reference Data)
+    // ====================================================================
+    /**
+     * Rules for /customers/{customerId}
+     * 
+     * Stores customer master data
+     * Each user has their own customers collection
+     */
+    match /customers/{customerId} {
+      allow read: if isAuthenticated() && 
+                     isOwner(resource.data.userId);
+      
+      allow create: if isAuthenticated() && 
+                       isOwner(request.resource.data.userId);
+      
+      allow update: if isAuthenticated() && 
+                       isOwner(resource.data.userId);
+      
+      allow delete: if isAuthenticated() && 
+                       isOwner(resource.data.userId);
+    }
+
+    // ====================================================================
+    // Templates Collection
+    // ====================================================================
+    /**
+     * Rules for /templates/{templateId}
+     * 
+     * Users can create and manage their own invoice templates
+     */
+    match /templates/{templateId} {
+      allow read: if isAuthenticated() && 
+                     isOwner(resource.data.userId);
+      
+      allow create: if isAuthenticated() && 
+                       isOwner(request.resource.data.userId);
+      
+      allow update: if isAuthenticated() && 
+                       isOwner(resource.data.userId);
+      
+      allow delete: if isAuthenticated() && 
+                       isOwner(resource.data.userId);
+    }
+
+    // ====================================================================
+    // Audit Logs Collection (Admin only)
+    // ====================================================================
+    /**
+     * Rules for /auditLogs/{logId}
+     * 
+     * System-wide audit logs
+     * Only admins can read, Cloud Functions write
+     */
+    match /auditLogs/{logId} {
+      // No reads allowed from client
+      allow read: if false;
+      
+      // No client writes allowed, only Cloud Functions
+      allow write: if false;
+    }
+
+    // ====================================================================
+    // Catch-all: Deny by default
+    // ====================================================================
+    /**
+     * Default deny rule for any unspecified paths
+     * This ensures security by default - must explicitly allow access
+     */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

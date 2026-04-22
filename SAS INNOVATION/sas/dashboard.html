@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PayFlow</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard-styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold">PF</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-indigo-600">PayFlow</h1>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden md:flex space-x-6">
+                    <a href="dashboard.html" class="text-indigo-600 font-medium transition border-b-2 border-indigo-600">Dashboard</a>
+                    <a href="invoices.html" class="text-gray-600 hover:text-indigo-600 font-medium transition">Invoices</a>
+                    <a href="settings.html" class="text-gray-600 hover:text-indigo-600 font-medium transition">Settings</a>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3 hidden sm:flex">
+                        <div class="text-right">
+                            <p id="userNameNav" class="text-gray-800 font-medium text-sm"></p>
+                            <p id="userEmailNav" class="text-gray-600 text-xs"></p>
+                        </div>
+                        <div id="avatarNav" class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:bg-indigo-700 transition" title="View Profile"></div>
+                    </div>
+                    <button id="logoutBtn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome back, <span id="userName"></span>! 👋</h2>
+            <p class="text-gray-600">Here's your invoice overview for today</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mb-8 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="invoices.html" class="bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold flex items-center justify-center space-x-2">
+                <span>+</span>
+                <span>New Invoice</span>
+            </a>
+            <button id="refreshBtn" class="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center space-x-2">
+                <span>🔄</span>
+                <span>Refresh Data</span>
+            </button>
+            <a href="invoices.html" class="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition font-semibold flex items-center justify-center space-x-2">
+                <span>📋</span>
+                <span>View All</span>
+            </a>
+            <button id="toggleViewBtn" class="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition font-semibold flex items-center justify-center space-x-2">
+                <span id="viewToggleIcon">📊</span>
+                <span id="viewToggleText">Table View</span>
+            </button>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <!-- Total Invoices -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-gray-600 font-medium">Total Invoices</h3>
+                    <span class="text-3xl">📄</span>
+                </div>
+                <p class="text-4xl font-bold text-gray-800 mb-2" id="statTotalInvoices">0</p>
+                <p class="text-gray-500 text-sm">All invoices</p>
+            </div>
+
+            <!-- Pending Invoices -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-gray-600 font-medium">Pending</h3>
+                    <span class="text-3xl">⏳</span>
+                </div>
+                <p class="text-4xl font-bold text-yellow-600 mb-2" id="statPending">0</p>
+                <p class="text-gray-500 text-sm">Awaiting payment</p>
+            </div>
+
+            <!-- Paid Invoices -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-gray-600 font-medium">Paid</h3>
+                    <span class="text-3xl">✅</span>
+                </div>
+                <p class="text-4xl font-bold text-green-600 mb-2" id="statPaid">0</p>
+                <p class="text-gray-500 text-sm">Completed</p>
+            </div>
+
+            <!-- Overdue Invoices -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-gray-600 font-medium">Overdue</h3>
+                    <span class="text-3xl">⚠️</span>
+                </div>
+                <p class="text-4xl font-bold text-red-600 mb-2" id="statOverdue">0</p>
+                <p class="text-gray-500 text-sm">Past due date</p>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-gray-600 font-medium">Total Value</h3>
+                    <span class="text-3xl">💰</span>
+                </div>
+                <p class="text-4xl font-bold text-indigo-600 mb-2" id="statTotalValue">$0</p>
+                <p class="text-gray-500 text-sm">All invoices</p>
+            </div>
+        </div>
+
+        <!-- Chart Section (Optional) -->
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <!-- Status Distribution -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Invoice Status Distribution</h3>
+                <div id="statusChart" class="space-y-3">
+                    <!-- Status distribution will be displayed here -->
+                </div>
+            </div>
+
+            <!-- Monthly Overview -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Overview</h3>
+                <div id="monthlyChart" class="space-y-3">
+                    <!-- Monthly data will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Invoices Section -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Recent Invoices</h3>
+                    <p class="text-gray-600 text-sm">Your latest invoices and their status</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="tableViewBtn" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition text-sm font-medium" title="Table View">
+                        📊 Table
+                    </button>
+                    <button id="cardViewBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition text-sm font-medium" title="Card View">
+                        🎴 Cards
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table View (Desktop) -->
+            <div id="tableViewContainer" class="hidden lg:block">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-gray-700 font-semibold">Customer</th>
+                                <th class="px-6 py-4 text-left text-gray-700 font-semibold">Amount</th>
+                                <th class="px-6 py-4 text-left text-gray-700 font-semibold">Due Date</th>
+                                <th class="px-6 py-4 text-left text-gray-700 font-semibold">Status</th>
+                                <th class="px-6 py-4 text-left text-gray-700 font-semibold">Days Left</th>
+                                <th class="px-6 py-4 text-left text-gray-700 font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoicesTableBody" class="divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                    <div class="flex justify-center">
+                                        <div class="animate-spin h-8 w-8 text-indigo-600"></div>
+                                    </div>
+                                    <p class="mt-2">Loading invoices...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Card View (Mobile & Desktop) -->
+            <div id="cardViewContainer" class="lg:hidden divide-y divide-gray-200 p-4">
+                <div id="invoicesCardView" class="space-y-4">
+                    <div class="p-4 border border-gray-300 rounded-lg">
+                        <div class="flex justify-center">
+                            <div class="animate-spin h-8 w-8 text-indigo-600"></div>
+                        </div>
+                        <p class="text-center text-gray-500 mt-2">Loading invoices...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-8 text-center">
+                <div class="text-5xl mb-4">📭</div>
+                <h4 class="text-lg font-semibold text-gray-800 mb-2">No Invoices Yet</h4>
+                <p class="text-gray-600 mb-4">Create your first invoice to get started</p>
+                <a href="invoices.html" class="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold">
+                    Create Invoice
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mark as Paid Modal -->
+    <div id="markPaidModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Mark Invoice as Paid</h3>
+            
+            <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                <p class="text-gray-600 text-sm mb-2">Invoice Details:</p>
+                <p id="modalCustomerName" class="font-semibold text-gray-800 mb-1"></p>
+                <p id="modalAmount" class="text-xl font-bold text-indigo-600 mb-1"></p>
+                <p id="modalDueDate" class="text-sm text-gray-600"></p>
+            </div>
+
+            <p class="text-gray-700 mb-6">Are you sure you want to mark this invoice as paid?</p>
+
+            <div class="flex gap-3">
+                <button id="confirmMarkPaidBtn" class="flex-1 bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 transition">
+                    Yes, Mark as Paid
+                </button>
+                <button id="cancelMarkPaidBtn" class="flex-1 bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-lg hover:bg-gray-400 transition">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="hidden fixed bottom-4 right-4 p-4 rounded-lg text-white font-medium shadow-lg z-50 animate-slideInRight">
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js" type="module"></script>
+    <script src="js/route-protection.js" type="module"></script>
+    <script src="js/invoice-utils.js" type="module"></script>
+    <script src="js/dashboard-service.js" type="module"></script>
+    <script src="js/dashboard.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFlow - Modern Invoice Management</title>
+    <link rel="stylesheet" href="css/tailwind-config.css">
+    <link rel="stylesheet" href="css/dashboard-modern.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="index.html" class="navbar-logo">
+                <span class="navbar-logo-icon">💳</span>
+                <span>PayFlow</span>
+            </a>
+            <div class="navbar-menu" style="margin-left: auto;">
+                <a href="#features" class="navbar-menu-item">Features</a>
+                <a href="#pricing" class="navbar-menu-item">Pricing</a>
+                <a href="#contact" class="navbar-menu-item">Contact</a>
+                <a href="login.html" class="btn btn-primary btn-sm">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center px-4 pt-20">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                Invoice Management Made <span class="text-primary">Simple</span>
+            </h1>
+            <p class="text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto">
+                Create professional invoices, send WhatsApp reminders, and track payments in seconds. 
+                Built for freelancers and small businesses.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                <a href="signup.html" class="btn btn-primary btn-lg">
+                    ✨ Start Free Trial
+                </a>
+                <a href="login.html" class="btn btn-secondary btn-lg">
+                    Sign In
+                </a>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid md:grid-cols-3 gap-6 mt-16">
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <div class="text-4xl mb-4">📄</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Easy Invoicing</h3>
+                    <p class="text-gray-600">Create professional invoices in seconds with our simple interface</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <div class="text-4xl mb-4">💬</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">WhatsApp Ready</h3>
+                    <p class="text-gray-600">Send payment reminders directly via WhatsApp to your customers</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Real-time Tracking</h3>
+                    <p class="text-gray-600">Track invoice status and payments in real-time with live updates</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="js/firebase-config.js" type="module"></script>
+    <script src="js/route-protection.js" type="module"></script>
+</body>
+</html>
